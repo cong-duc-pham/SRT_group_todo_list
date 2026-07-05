@@ -1,0 +1,35 @@
+## Ignore Visual Studio temporary files, build results, and user settings
+.vs/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Re]leases/
+x64/
+x86/
+[Aa]rchive/
+[Bb]uild/
+bld/
+[Bb]in/
+[Oo]bj/
+out/
+Log/
+Logs/
+
+## User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+## Roslyn cache directories
+*.osg
+*.uap
+
+## Rule set NuGet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
