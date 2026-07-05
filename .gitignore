@@ -33,3 +33,8 @@ artifacts/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+## SQLite database files
+*.db
+*.db-shm
+*.db-wal
