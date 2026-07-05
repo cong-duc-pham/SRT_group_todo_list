@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  todo-web:
+    container_name: srt_todo_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - todo-data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development # Allows EF migrations database logs output on startup
+    restart: always
+
+volumes:
+  todo-data:
+    driver: local

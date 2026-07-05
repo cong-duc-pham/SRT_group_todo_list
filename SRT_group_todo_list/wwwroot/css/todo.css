@@ -119,7 +119,7 @@ body {
     background-color: var(--card-bg);
 }
 
-.empty-state i {
+.empty-state > i {
     font-size: 2.5rem;
     color: #cbd5e1;
 }
