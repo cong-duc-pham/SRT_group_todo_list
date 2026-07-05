@@ -1,0 +1,245 @@
+@model IEnumerable<SRT_group_todo_list.Models.TodoItem>
+@{
+    ViewData["Title"] = "Task Dashboard";
+    var currentSearch = ViewData["CurrentSearch"] as string;
+    var currentFilter = ViewData["CurrentFilter"] as bool?;
+    var currentSort = ViewData["CurrentSort"] as string;
+}
+
+<div class="row g-4">
+    <!-- Left Panel: Stats and Quick Controls -->
+    <div class="col-lg-4">
+        <div class="card todo-card p-4 app-header text-white mb-4">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-clock-history fs-2 me-3"></i>
+                <div>
+                    <h4 class="mb-0 fw-bold">Task Manager</h4>
+                    <small class="opacity-75">Organize your workday</small>
+                </div>
+            </div>
+            <hr class="opacity-25">
+            <button class="btn btn-light w-100 fw-bold py-2 shadow-sm text-primary" data-bs-toggle="modal" data-bs-target="#createTodoModal">
+                <i class="bi bi-plus-lg me-2"></i>Create New Task
+            </button>
+        </div>
+
+        <!-- Task Stats Card -->
+        <div class="card todo-card p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Statistics</h5>
+            <div class="row text-center g-2">
+                <div class="col-4">
+                    <div class="bg-light p-3 rounded">
+                        <h4 class="fw-bold text-dark mb-1" id="count-total">@Model.Count()</h4>
+                        <small class="text-muted fs-7">Total</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="bg-light p-3 rounded">
+                        <h4 class="fw-bold text-warning mb-1" id="count-pending">@Model.Count(t => !t.IsCompleted)</h4>
+                        <small class="text-muted fs-7">Active</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="bg-light p-3 rounded">
+                        <h4 class="fw-bold text-success mb-1" id="count-completed">@Model.Count(t => t.IsCompleted)</h4>
+                        <small class="text-muted fs-7">Completed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Filters & Task Cards List -->
+    <div class="col-lg-8">
+        <!-- Filter & Search Toolbar -->
+        <form method="get" asp-action="Index" class="filter-bar p-3 mb-4 rounded border">
+            <div class="row g-3 align-items-center">
+                <!-- Search input -->
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="search" value="@currentSearch" class="form-control border-start-0 ps-0" placeholder="Search tasks..." />
+                    </div>
+                </div>
+
+                <!-- Lọc Trạng thái (isCompleted) -->
+                <div class="col-md-4">
+                    <select name="isCompleted" class="form-select" onchange="this.form.submit()">
+                        <option value="" selected="@(currentFilter == null)">All Statuses</option>
+                        <option value="false" selected="@(currentFilter == false)">Active Only</option>
+                        <option value="true" selected="@(currentFilter == true)">Completed Only</option>
+                    </select>
+                </div>
+
+                <!-- Sắp xếp (sortBy) -->
+                <div class="col-md-3">
+                    <select name="sortBy" class="form-select" onchange="this.form.submit()">
+                        <option value="newest" selected="@(currentSort == "newest")">Newest First</option>
+                        <option value="oldest" selected="@(currentSort == "oldest")">Oldest First</option>
+                        <option value="due_date" selected="@(currentSort == "due_date")">Due Date (Asc)</option>
+                        <option value="due_date_desc" selected="@(currentSort == "due_date_desc")">Due Date (Desc)</option>
+                        <option value="title" selected="@(currentSort == "title")">Title (A-Z)</option>
+                        <option value="title_desc" selected="@(currentSort == "title_desc")">Title (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <!-- Todo Items List -->
+        <div id="todoListContainer" class="d-flex flex-column gap-3">
+            @if (!Model.Any())
+            {
+                <div class="card todo-card empty-state text-center border p-5">
+                    <i class="bi bi-folder2-open mb-3 text-muted"></i>
+                    <h5 class="fw-bold">No Tasks Found</h5>
+                    <p class="text-muted mb-4">Try clearing filters or add a new task to get started.</p>
+                    <button class="btn btn-primary px-4 btn-action" data-bs-toggle="modal" data-bs-target="#createTodoModal">
+                        <i class="bi bi-plus-lg me-2"></i>Add First Task
+                    </button>
+                </div>
+            }
+            else
+            {
+                @Html.AntiForgeryToken()
+                @foreach (var item in Model)
+                {
+                    <div class="card todo-card p-3 @(item.IsCompleted ? "todo-completed" : "")" data-id="@item.Id">
+                        <div class="d-flex align-items-start gap-3">
+                            <!-- Toggle checkbox -->
+                            <div class="pt-1">
+                                <input type="checkbox" class="todo-checkbox" data-id="@item.Id" @(item.IsCompleted ? "checked" : "") />
+                            </div>
+
+                            <!-- Title & description -->
+                            <div class="flex-grow-1">
+                                <div class="todo-title text-dark">@item.Title</div>
+                                @if (!string.IsNullOrWhiteSpace(item.Description))
+                                {
+                                    <div class="todo-desc text-muted fs-7 mt-1">@item.Description</div>
+                                }
+                                
+                                <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                                    <!-- Created Date -->
+                                    <small class="text-muted fs-8">
+                                        <i class="bi bi-calendar3 me-1"></i>Created: @item.CreatedAt.ToString("g")
+                                    </small>
+
+                                    <!-- Due Date Badge -->
+                                    @if (item.DueDate.HasValue)
+                                    {
+                                        var isOverdue = !item.IsCompleted && item.DueDate.Value.Date < DateTime.Today;
+                                        <span class="badge-due @(isOverdue ? "badge-due-urgent" : "badge-due-normal")">
+                                            <i class="bi bi-alarm-fill me-1"></i>Due: @item.DueDate.Value.ToString("d")
+                                            @if (isOverdue)
+                                            {
+                                                <strong class="ms-1">(Overdue)</strong>
+                                            }
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Edit and Delete Actions -->
+                            <div class="d-flex gap-1 align-self-start">
+                                <button class="btn btn-sm btn-outline-primary btn-action btn-edit-todo" data-id="@item.Id" title="Edit Task">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action btn-delete-todo" data-id="@item.Id" data-title="@item.Title" title="Delete Task">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: CREATE TODO ITEM                    -->
+<!-- ========================================== -->
+<div class="modal fade" id="createTodoModal" tabindex="-1" aria-labelledby="createTodoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="createTodoModalLabel"><i class="bi bi-plus-circle me-2"></i>Create New Task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createTodoForm" method="post" asp-action="Create">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="createTitle" class="form-label fw-semibold">Task Title <span class="text-danger">*</span></label>
+                        <input type="text" id="createTitle" name="Title" class="form-control" placeholder="Enter task title" required data-val="true" data-val-required="Title is required." maxlength="100" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Title" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createDescription" class="form-label fw-semibold">Description</label>
+                        <textarea id="createDescription" name="Description" class="form-control" rows="3" placeholder="Enter description details" maxlength="500"></textarea>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Description" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createDueDate" class="form-label fw-semibold">Due Date</label>
+                        <input type="date" id="createDueDate" name="DueDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="DueDate" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 btn-action">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL: EDIT TODO ITEM                      -->
+<!-- ========================================== -->
+<div class="modal fade" id="editTodoModal" tabindex="-1" aria-labelledby="editTodoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="editTodoModalLabel"><i class="bi bi-pencil-square me-2"></i>Edit Task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editTodoForm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editId" name="Id" />
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="editTitle" class="form-label fw-semibold">Task Title <span class="text-danger">*</span></label>
+                        <input type="text" id="editTitle" name="Title" class="form-control" required data-val="true" data-val-required="Title is required." maxlength="100" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Title" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label fw-semibold">Description</label>
+                        <textarea id="editDescription" name="Description" class="form-control" rows="3" maxlength="500"></textarea>
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Description" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDueDate" class="form-label fw-semibold">Due Date</label>
+                        <input type="date" id="editDueDate" name="DueDate" class="form-control" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="DueDate" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="editIsCompleted" name="IsCompleted" value="true" />
+                        <label class="form-check-label fw-semibold" for="editIsCompleted">Completed</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info text-white px-4 btn-action">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/todo.js" asp-append-version="true"></script>
+}

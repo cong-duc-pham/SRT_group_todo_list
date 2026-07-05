@@ -1,0 +1,145 @@
+/* Minimalist & Clean Todo Application Styling */
+
+:root {
+    --primary-color: #2563eb;     /* Royal Blue */
+    --success-color: #16a34a;     /* Forest Green */
+    --warning-color: #d97706;     /* Amber */
+    --danger-color: #dc2626;      /* Red */
+    --bg-color: #f8fafc;          /* Off-white */
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;      /* Light gray border */
+    --text-color: #1e293b;        /* Dark slate */
+    --text-muted: #64748b;        /* Slate gray */
+    
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --border-radius-lg: 12px;
+    --border-radius-md: 8px;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+}
+
+/* Header & Card styles */
+.app-header {
+    background-color: var(--primary-color) !important;
+    color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
+}
+
+.todo-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.2s ease;
+    background-color: var(--card-bg);
+    overflow: hidden;
+}
+
+.todo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+    border-color: #cbd5e1;
+}
+
+/* Checkbox Toggle */
+.todo-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px !important;
+    border: 2px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    appearance: none;
+    display: inline-grid;
+    place-content: center;
+    position: relative;
+    outline: none;
+}
+
+.todo-checkbox:checked {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.todo-checkbox:checked::before {
+    content: "✓";
+    font-size: 12px;
+    color: white;
+    font-weight: bold;
+}
+
+.todo-checkbox:hover {
+    border-color: var(--primary-color);
+}
+
+/* Text styles for completed items */
+.todo-title {
+    font-weight: 550;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.todo-completed .todo-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.todo-completed .todo-desc {
+    color: #cbd5e1 !important;
+}
+
+/* Action buttons */
+.btn-action {
+    transition: all 0.15s ease;
+    border-radius: var(--border-radius-md);
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+}
+
+/* Search and Filters Layout */
+.filter-bar {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color);
+}
+
+/* Empty state styling */
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+    border: 1px dashed var(--border-color);
+    background-color: var(--card-bg);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    color: #cbd5e1;
+}
+
+/* Badge styles */
+.badge-due {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.badge-due-urgent {
+    background-color: #fee2e2;
+    color: var(--danger-color);
+    border: 1px solid #fecaca;
+}
+
+.badge-due-normal {
+    background-color: #f1f5f9;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
