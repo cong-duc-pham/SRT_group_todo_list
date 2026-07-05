@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SRT_group_todo_list.Models;
+using SRT_group_todo_list.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllersWithViews();
 // Register DbContext with SQLite
 builder.Services.AddDbContext<TodoDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Services
+builder.Services.AddScoped<ITodoService, TodoService>();
 
 var app = builder.Build();
 
